@@ -1,9 +1,10 @@
-package com.tebasaki.yu.wear.compass
+package com.tebasaki.yu.wear.compass.activity
 
 import android.app.Activity
 import android.os.Bundle
 import android.support.wearable.view.WatchViewStub
 import android.widget.TextView
+import com.tebasaki.yu.wear.compass.R
 
 public class MainActivity : Activity() {
 
