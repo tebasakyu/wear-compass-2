@@ -1,0 +1,116 @@
+package com.tebasaki.yu.wear.compass.fragment
+
+import android.content.pm.PackageManager
+import android.location.Location
+import android.os.Bundle
+import android.support.v4.app.Fragment
+import android.util.Log
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.common.api.ResultCallback
+import com.google.android.gms.common.api.Status
+import com.google.android.gms.location.LocationListener
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.wearable.Wearable
+
+public class DetectLocationFragment : Fragment() ,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
+
+    private val UPDATE_INTERVAL_MS: Long = 1000
+    private val FASTEST_INTERVAL_MS: Long = 500
+
+
+    private var mGoogleApiClient: GoogleApiClient? = null
+
+
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super<Fragment>.onCreate(savedInstanceState)
+
+        // hardware has GPS check
+        if (! hasGps()) {
+            Log.w("", "This hardware doesn't have GPS.");
+            getActivity().getSupportFragmentManager().popBackStack()
+        }
+
+        // build GoogleApiClient
+        mGoogleApiClient = GoogleApiClient.Builder(getActivity())
+                .addApi(LocationServices.API)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build()
+    }
+
+
+    override fun onResume() {
+        super<Fragment>.onResume()
+        mGoogleApiClient?.connect()
+    }
+
+
+    override fun onPause() {
+        super<Fragment>.onPause()
+
+        if (null != mGoogleApiClient) {
+            if (mGoogleApiClient!!.isConnected()) {
+                LocationServices.FusedLocationApi
+                        .removeLocationUpdates(mGoogleApiClient, this);
+            }
+            mGoogleApiClient?.disconnect()
+        }
+    }
+
+
+    override fun onConnected(bundle: Bundle) {
+
+        // 位置情報取得の設定
+        var locationRequest: LocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+                .setInterval(UPDATE_INTERVAL_MS)
+                .setFastestInterval(FASTEST_INTERVAL_MS)
+
+        // 位置情報の要求
+        LocationServices.FusedLocationApi
+                .requestLocationUpdates(mGoogleApiClient, locationRequest, this)
+                .setResultCallback(object: ResultCallback<Status> {
+                    override fun onResult(status: Status) {
+
+                        if (status.getStatus().isSuccess()) {
+                            Log.d("", "Successfully requested location updates");
+                        } else {
+                            Log.e("",
+                                    "Failed in requesting location updates, "
+                                            + "status code: "
+                                            + status.getStatusCode()
+                                            + ", message: "
+                                            + status.getStatusMessage());
+                        }
+                    }
+                })
+    }
+
+    override fun onConnectionSuspended(i: Int) {
+        Log.d("", "connection to location client suspended");
+    }
+
+    override fun onConnectionFailed(result: ConnectionResult) {
+
+    }
+
+    override fun onLocationChanged(location: Location) {
+        Log.d("", "Latitude=" + location.getLatitude())
+        Log.d("", "Longitude=" + location.getLongitude())
+    }
+
+
+
+    private fun hasGps() : Boolean {
+        return getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+    }
+
+}
