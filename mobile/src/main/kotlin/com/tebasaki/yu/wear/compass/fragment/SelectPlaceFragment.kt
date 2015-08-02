@@ -49,11 +49,11 @@ public class SelectPlaceFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (PLACE_PICKER_REQUEST == requestCode) {
-            if (Activity.RESULT_OK == requestCode) {
+            if (Activity.RESULT_OK == resultCode) {
                 val place: Place = PlacePicker.getPlace(data, getActivity())
                 placeName.setText(place.getName())
                 phoneNumber.setText(place.getPhoneNumber())
-                webSiteUrl.setText(place.getWebsiteUri().toString())
+                webSiteUrl.setText(place.getWebsiteUri()?.toString())
             }
         }
     }
