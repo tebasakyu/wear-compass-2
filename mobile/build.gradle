@@ -29,6 +29,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.google.android.gms:play-services:7.5.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
 }
 buildscript {
     ext.kotlin_version = '0.12.1218'
@@ -41,4 +42,7 @@ buildscript {
 }
 repositories {
     mavenCentral()
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
 }
