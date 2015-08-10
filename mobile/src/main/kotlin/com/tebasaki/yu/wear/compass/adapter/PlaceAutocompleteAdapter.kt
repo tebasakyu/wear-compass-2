@@ -15,7 +15,7 @@ public class PlaceAutocompleteAdapter : BaseAdapter(), Filterable {
 
 
     override fun getCount(): Int {
-        return mResultList!!.size()
+        return if (null == mResultList) 0 else mResultList!!.size()
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
@@ -23,8 +23,8 @@ public class PlaceAutocompleteAdapter : BaseAdapter(), Filterable {
         return convertView
     }
 
-    override fun getItem(position: Int): PlaceAutocomplete {
-        return mResultList!!.get(position)
+    override fun getItem(position: Int): PlaceAutocomplete? {
+        return mResultList?.get(position)
     }
 
     override fun getItemId(position: Int): Long {
