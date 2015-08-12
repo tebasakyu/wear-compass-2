@@ -20,10 +20,10 @@ import java.util.concurrent.TimeUnit
  */
 public class PlaceAutocompleteAdapter(val mContext: Context, val mResource: Int,
                                       val mGoogleApiClient: GoogleApiClient, val mBounds: LatLngBounds,
-                                      val mPlaceFilter: AutocompleteFilter) : BaseAdapter(), Filterable {
+                                      val mPlaceFilter: AutocompleteFilter?) : BaseAdapter(), Filterable {
 
     /** Current results returned by this adapter. */
-    private var mResultList: Array<PlaceAutocomplete>? = null
+    private var mResultList: ArrayList<PlaceAutocomplete>? = null
 
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
@@ -77,7 +77,7 @@ public class PlaceAutocompleteAdapter(val mContext: Context, val mResource: Int,
         return filter
     }
 
-    private fun getAutocomplete(constraint: CharSequence): Array<PlaceAutocomplete>? {
+    private fun getAutocomplete(constraint: CharSequence): ArrayList<PlaceAutocomplete>? {
 
         if (!mGoogleApiClient.isConnected()) {
             return null
@@ -102,12 +102,11 @@ public class PlaceAutocompleteAdapter(val mContext: Context, val mResource: Int,
             // Copy the results into our own data structure, because we can't hold onto the buffer.
             // AutocompletePrediction objects encapsulate the API response (place ID and description).
             val iterator: Iterator<AutocompletePrediction> = autocompletePredictions.iterator()
-            val resultList: Array<PlaceAutocomplete> = emptyArray()
-            for (i in 0..autocompletePredictions.getCount()) {
-                if (iterator.hasNext()) {
-                    val prediction = iterator.next()
-                    resultList.set(i, PlaceAutocomplete(prediction.getPlaceId(), prediction.getDescription()))
-                }
+            val resultList = arrayListOf<PlaceAutocomplete>()
+
+            while (iterator.hasNext()) {
+                val prediction = iterator.next()
+                resultList.add(PlaceAutocomplete(prediction.getPlaceId(), prediction.getDescription()))
             }
             // Release the buffer now that all data has been copied.
             autocompletePredictions.release()
