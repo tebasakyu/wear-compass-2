@@ -8,12 +8,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.TextView
 import butterknife.bindView
 import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.location.places.Place
+import com.google.android.gms.location.places.PlaceBuffer
 import com.google.android.gms.location.places.Places
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.google.android.gms.maps.model.LatLng
@@ -33,7 +36,7 @@ public class SelectPlaceFragment : Fragment() {
     private val webSiteUrl: TextView by bindView(R.id.webSiteUrl)
 
     private val autocompletePlaces: AutoCompleteTextView by bindView(R.id.autocomplete_places)
-    private var mAdpter: PlaceAutocompleteAdapter? = null
+    private var mAdapter: PlaceAutocompleteAdapter? = null
 
     companion object {
 
@@ -75,9 +78,10 @@ public class SelectPlaceFragment : Fragment() {
             startActivityForResult(builder.build(getActivity()), PLACE_PICKER_REQUEST)
         }
 
-        mAdpter = PlaceAutocompleteAdapter(getActivity(), R.layout.item_auto_complete_text,
+        mAdapter = PlaceAutocompleteAdapter(getActivity(), R.layout.item_auto_complete_text,
                 mGoogleApiClient!!, BOUNDS_GREATER_SYDNEY, null)
-        autocompletePlaces.setAdapter(mAdpter)
+        autocompletePlaces.setAdapter(mAdapter)
+        autocompletePlaces.setOnItemClickListener(mAutocompleteClickListener)
     }
 
     override fun onStop() {
@@ -95,6 +99,39 @@ public class SelectPlaceFragment : Fragment() {
                 phoneNumber.setText(place.getPhoneNumber())
                 webSiteUrl.setText(place.getWebsiteUri()?.toString())
             }
+        }
+    }
+
+
+    private val mAutocompleteClickListener = object: AdapterView.OnItemClickListener {
+        override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+
+            val item = mAdapter?.getItem(position)
+            val placeId = item?.placeId.toString()
+
+            autocompletePlaces.setText(item?.description)
+
+            val placeResult = Places.GeoDataApi.getPlaceById(mGoogleApiClient, placeId)
+            placeResult.setResultCallback(mUpdatePlaceDetailsCallback)
+        }
+    }
+
+    private val mUpdatePlaceDetailsCallback = object : ResultCallback<PlaceBuffer> {
+        override fun onResult(places: PlaceBuffer?) {
+
+            if (!places!!.getStatus()!!.isSuccess()) {
+                // Request did not complete successfully
+                places.release()
+                return
+            }
+
+            // Get the Place object from the buffer.
+            val place = places.get(0)
+            place.getName()
+            place.getPhoneNumber()
+            place.getWebsiteUri()?.toString()
+
+            places.release()
         }
     }
 }
