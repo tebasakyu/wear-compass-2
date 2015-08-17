@@ -1,17 +1,20 @@
 package com.tebasaki.yu.wear.compass.adapter
 
 import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Filter
 import android.widget.Filterable
+import android.widget.TextView
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.places.AutocompleteFilter
 import com.google.android.gms.location.places.AutocompletePrediction
 import com.google.android.gms.location.places.Places
 import com.google.android.gms.maps.model.LatLngBounds
-import java.util.*
+import com.tebasaki.yu.wear.compass.R
+import java.util.ArrayList
 import java.util.concurrent.TimeUnit
 
 /**
@@ -22,11 +25,26 @@ public class PlaceAutocompleteAdapter(val mContext: Context, val mResource: Int,
                                       val mGoogleApiClient: GoogleApiClient, val mBounds: LatLngBounds,
                                       val mPlaceFilter: AutocompleteFilter?) : BaseAdapter(), Filterable {
 
+    private var mInflater: LayoutInflater? = null
+
+    /** initializer blocks */
+    init {
+        mInflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    }
+
     /** Current results returned by this adapter. */
     private var mResultList: ArrayList<PlaceAutocomplete>? = null
 
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
+    override fun getView(position: Int, view: View?, parent: ViewGroup): View? {
+
+        var convertView: View? = view
+        if (null == convertView) {
+            convertView = mInflater!!.inflate(mResource, parent, false)
+        }
+
+        val placeNameText: TextView = convertView?.findViewById(R.id.placeName) as TextView
+        placeNameText.setText(mResultList!!.get(position).description)
 
         return convertView
     }

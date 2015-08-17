@@ -75,7 +75,7 @@ public class SelectPlaceFragment : Fragment() {
             startActivityForResult(builder.build(getActivity()), PLACE_PICKER_REQUEST)
         }
 
-        mAdpter = PlaceAutocompleteAdapter(getActivity(), android.R.layout.simple_list_item_1,
+        mAdpter = PlaceAutocompleteAdapter(getActivity(), R.layout.item_auto_complete_text,
                 mGoogleApiClient!!, BOUNDS_GREATER_SYDNEY, null)
         autocompletePlaces.setAdapter(mAdpter)
     }
