@@ -110,6 +110,7 @@ public class SelectPlaceFragment : Fragment() {
             val placeId = item?.placeId.toString()
 
             autocompletePlaces.setText(item?.description)
+            autocompletePlaces.setSelection(autocompletePlaces.getText().length())
 
             val placeResult = Places.GeoDataApi.getPlaceById(mGoogleApiClient, placeId)
             placeResult.setResultCallback(mUpdatePlaceDetailsCallback)
