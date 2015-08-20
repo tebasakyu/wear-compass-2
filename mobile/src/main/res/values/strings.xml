@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">wear-compass-2</string>
+
+    <string name="pick_a_place">Pick a place by Map</string>
+    <string name="please_input_place">Or input place name here</string>
+    <string name="latitude">Latitude : </string>
+    <string name="longitude">Longitude : </string>
 </resources>
