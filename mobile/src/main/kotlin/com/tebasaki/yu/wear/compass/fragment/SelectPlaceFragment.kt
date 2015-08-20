@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.util.Log
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -141,16 +141,16 @@ public class SelectPlaceFragment : Fragment() {
         // Place name
         placeName.setText(place.getName())
         // Tel
-        if (null != place.getPhoneNumber()) {
+        if (!TextUtils.isEmpty(place.getPhoneNumber())) {
             phoneNumber.setText(place.getPhoneNumber())
         } else {
-            phoneNumber.setVisibility(View.GONE)
+            phoneNumber.setText(R.string.none)
         }
         // Web URL
         if (null != place.getWebsiteUri()) {
             webSiteUrl.setText(place.getWebsiteUri().toString())
         } else {
-            webSiteUrl.setVisibility(View.GONE)
+            phoneNumber.setText(R.string.none)
         }
 
         // Local
