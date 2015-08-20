@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">wear-compass-2</string>
+
+    <string name="pick_a_place">Pick a place by Map</string>
+    <string name="please_input_place">Or input place name here</string>
+
+    <string name="place_name"><u>Place name</u></string>
+    <string name="place_tel"><u>Tel</u></string>
+    <string name="place_web_site"><u>Web site</u></string>
+    <string name="latitude"><u>Latitude</u></string>
+    <string name="longitude"><u>Longitude</u></string>
+
+    <string name="none">none</string>
 </resources>

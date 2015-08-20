@@ -5,4 +5,16 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="PlaceInfo_h1">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="PlaceInfo_h2">
+        <item name="android:textSize">18sp</item>
+    </style>
+    <style name="PlaceInfo_h2_black" parent="PlaceInfo_h2">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
 </resources>
