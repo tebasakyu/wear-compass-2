@@ -34,6 +34,8 @@ public class SelectPlaceFragment : Fragment() {
     private val placeName: TextView by bindView(R.id.placeName)
     private val phoneNumber: TextView by bindView(R.id.phoneNumber)
     private val webSiteUrl: TextView by bindView(R.id.webSiteUrl)
+    private val latitudeText: TextView by bindView(R.id.latitude)
+    private val longitudeText: TextView by bindView(R.id.longitude)
 
     private val autocompletePlaces: AutoCompleteTextView by bindView(R.id.autocomplete_places)
     private var mAdapter: PlaceAutocompleteAdapter? = null
@@ -94,10 +96,8 @@ public class SelectPlaceFragment : Fragment() {
 
         if (PLACE_PICKER_REQUEST == requestCode) {
             if (Activity.RESULT_OK == resultCode) {
-                val place: Place = PlacePicker.getPlace(data, getActivity())
-                placeName.setText(place.getName())
-                phoneNumber.setText(place.getPhoneNumber())
-                webSiteUrl.setText(place.getWebsiteUri()?.toString())
+                // to display
+                displayPlaceInfo(PlacePicker.getPlace(data, getActivity()))
             }
         }
     }
@@ -128,11 +128,34 @@ public class SelectPlaceFragment : Fragment() {
 
             // Get the Place object from the buffer.
             val place = places.get(0)
-            place.getName()
-            place.getPhoneNumber()
-            place.getWebsiteUri()?.toString()
+            // to display
+            displayPlaceInfo(place)
 
             places.release()
         }
+    }
+
+
+    private fun displayPlaceInfo(place: Place) {
+
+        // Place name
+        placeName.setText(place.getName())
+        // Tel
+        if (null != place.getPhoneNumber()) {
+            phoneNumber.setText(place.getPhoneNumber())
+        } else {
+            phoneNumber.setVisibility(View.GONE)
+        }
+        // Web URL
+        if (null != place.getWebsiteUri()) {
+            webSiteUrl.setText(place.getWebsiteUri().toString())
+        } else {
+            webSiteUrl.setVisibility(View.GONE)
+        }
+
+        // Local
+        val local: LatLng = place.getLatLng()
+        latitudeText.setText(local.latitude.toString())
+        longitudeText.setText(local.longitude.toString())
     }
 }
