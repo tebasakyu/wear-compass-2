@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ import com.google.android.gms.location.places.Places
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.wearable.Wearable
 import com.tebasaki.yu.wear.compass.R
 import com.tebasaki.yu.wear.compass.adapter.PlaceAutocompleteAdapter
 import kotlin.platform.platformStatic
@@ -59,8 +61,19 @@ public class SelectPlaceFragment : Fragment() {
 
         mGoogleApiClient = GoogleApiClient.Builder(getActivity())
                 .addApi(Places.GEO_DATA_API)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(object : GoogleApiClient.ConnectionCallbacks {
+                    override fun onConnected(bundle: Bundle) {
+                        Log.d("", "onConnected")
+                    }
+                    override fun onConnectionSuspended(i: Int) {
+                        Log.d("", "onConnectionSuspended: " + i)
+                    }
+                })
+                .addOnConnectionFailedListener({
+                    connectionResult -> Log.d("", "onConnectionFailed: " + connectionResult)
+                })
                 .build()
-
     }
 
     override fun onStart() {
