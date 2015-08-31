@@ -22,6 +22,7 @@ import com.google.android.gms.location.places.Places
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.Wearable
 import com.tebasaki.yu.wear.compass.R
 import com.tebasaki.yu.wear.compass.adapter.PlaceAutocompleteAdapter
@@ -38,6 +39,7 @@ public class SelectPlaceFragment : Fragment() {
     private val webSiteUrl: TextView by bindView(R.id.webSiteUrl)
     private val latitudeText: TextView by bindView(R.id.latitude)
     private val longitudeText: TextView by bindView(R.id.longitude)
+    private val sendDataToWearBtn: Button by bindView(R.id.sendDataToWearBtn)
 
     private val autocompletePlaces: AutoCompleteTextView by bindView(R.id.autocomplete_places)
     private var mAdapter: PlaceAutocompleteAdapter? = null
@@ -70,9 +72,9 @@ public class SelectPlaceFragment : Fragment() {
                         Log.d("", "onConnectionSuspended: " + i)
                     }
                 })
-                .addOnConnectionFailedListener({
+                .addOnConnectionFailedListener {
                     connectionResult -> Log.d("", "onConnectionFailed: " + connectionResult)
-                })
+                }
                 .build()
     }
 
@@ -91,6 +93,16 @@ public class SelectPlaceFragment : Fragment() {
         startPlacePickerBtn.setOnClickListener {
             val builder: PlacePicker.IntentBuilder = PlacePicker.IntentBuilder()
             startActivityForResult(builder.build(getActivity()), PLACE_PICKER_REQUEST)
+        }
+
+        sendDataToWearBtn.setOnClickListener {
+            Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(
+                    { nodes ->
+                        Log.d(TAG, "get nodes")
+                        for (node in nodes.getNodes()) {
+                            // TODO: sending message to node
+                        }
+                    })
         }
 
         mAdapter = PlaceAutocompleteAdapter(getActivity(), R.layout.item_auto_complete_text,
