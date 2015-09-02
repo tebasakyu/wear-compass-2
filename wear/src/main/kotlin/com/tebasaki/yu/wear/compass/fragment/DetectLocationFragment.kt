@@ -13,6 +13,7 @@ import com.google.android.gms.location.LocationListener
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.wearable.Wearable
+import kotlin.platform.platformStatic
 
 public class DetectLocationFragment : Fragment() ,
         GoogleApiClient.ConnectionCallbacks,
@@ -22,11 +23,14 @@ public class DetectLocationFragment : Fragment() ,
     private val UPDATE_INTERVAL_MS: Long = 1000
     private val FASTEST_INTERVAL_MS: Long = 500
 
-
     private var mGoogleApiClient: GoogleApiClient? = null
 
 
-
+    companion object {
+        platformStatic fun newInstance() : DetectLocationFragment {
+            return DetectLocationFragment()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super<Fragment>.onCreate(savedInstanceState)
