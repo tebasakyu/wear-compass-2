@@ -5,13 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.AutoCompleteTextView
-import android.widget.Button
-import android.widget.TextView
+import android.widget.*
 import butterknife.bindView
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.ResultCallback
@@ -21,6 +19,7 @@ import com.google.android.gms.location.places.Places
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.wearable.Wearable
 import com.tebasaki.yu.wear.compass.R
 import com.tebasaki.yu.wear.compass.adapter.PlaceAutocompleteAdapter
 import kotlin.platform.platformStatic
@@ -36,9 +35,13 @@ public class SelectPlaceFragment : Fragment() {
     private val webSiteUrl: TextView by bindView(R.id.webSiteUrl)
     private val latitudeText: TextView by bindView(R.id.latitude)
     private val longitudeText: TextView by bindView(R.id.longitude)
+    private val sendDataToWearBtn: Button by bindView(R.id.sendDataToWearBtn)
 
     private val autocompletePlaces: AutoCompleteTextView by bindView(R.id.autocomplete_places)
     private var mAdapter: PlaceAutocompleteAdapter? = null
+
+    private var mLatitude: Double = 0.0
+    private var mLongitude: Double = 0.0
 
     companion object {
 
@@ -59,8 +62,8 @@ public class SelectPlaceFragment : Fragment() {
 
         mGoogleApiClient = GoogleApiClient.Builder(getActivity())
                 .addApi(Places.GEO_DATA_API)
+                .addApi(Wearable.API)
                 .build()
-
     }
 
     override fun onStart() {
@@ -78,6 +81,27 @@ public class SelectPlaceFragment : Fragment() {
         startPlacePickerBtn.setOnClickListener {
             val builder: PlacePicker.IntentBuilder = PlacePicker.IntentBuilder()
             startActivityForResult(builder.build(getActivity()), PLACE_PICKER_REQUEST)
+        }
+
+        sendDataToWearBtn.setOnClickListener {
+            if (0.0 == mLatitude || 0.0 == mLongitude) {
+                showToast("Please pick or input place")
+                return@setOnClickListener
+            }
+            Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(
+                    { nodes ->
+                        val sendStr: String = mLatitude.toString() + "," + mLongitude.toString()
+                        val sendData: ByteArray = sendStr.toByteArray()
+                        for (node in nodes.getNodes()) {
+                            Wearable.MessageApi
+                                    .sendMessage(mGoogleApiClient, node.getId(), "/locale_set", sendData)
+                                    .setResultCallback(
+                                            { result ->
+                                                showToast(result.getStatus().toString())
+                                            }
+                                    )
+                        }
+                    })
         }
 
         mAdapter = PlaceAutocompleteAdapter(getActivity(), R.layout.item_auto_complete_text,
@@ -157,5 +181,9 @@ public class SelectPlaceFragment : Fragment() {
         val local: LatLng = place.getLatLng()
         latitudeText.setText(local.latitude.toString())
         longitudeText.setText(local.longitude.toString())
+    }
+
+    private fun showToast(msg: String) {
+        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show()
     }
 }

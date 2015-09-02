@@ -11,4 +11,6 @@
     <string name="longitude"><u>Longitude</u></string>
 
     <string name="none">none</string>
+
+    <string name="send_to_wear">This location send to watch</string>
 </resources>
