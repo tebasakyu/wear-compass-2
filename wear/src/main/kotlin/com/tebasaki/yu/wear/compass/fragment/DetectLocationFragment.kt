@@ -1,11 +1,11 @@
 package com.tebasaki.yu.wear.compass.fragment
 
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
-import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.common.api.Status
@@ -23,6 +23,7 @@ public class DetectLocationFragment : Fragment() ,
     private val FASTEST_INTERVAL_MS: Long = 500
 
     private var mGoogleApiClient: GoogleApiClient? = null
+    private var mCallback : OnLocationListener? = null
 
 
     companion object {
@@ -54,6 +55,15 @@ public class DetectLocationFragment : Fragment() ,
         mGoogleApiClient?.connect()
     }
 
+    override fun onAttach(activity: Activity?) {
+        super<Fragment>.onAttach(activity)
+
+        try {
+            mCallback = activity as OnLocationListener
+        } catch(ex: ClassCastException) {
+            throw ClassCastException(activity.toString() + " must implement OnLocationListener")
+        }
+    }
 
     override fun onPause() {
         super<Fragment>.onPause()
@@ -106,9 +116,12 @@ public class DetectLocationFragment : Fragment() ,
     }
 
 
-
     private fun hasGps() : Boolean {
         return getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
     }
 
+
+    public interface OnLocationListener {
+        fun onLocationChanged(location: Location)
+    }
 }
