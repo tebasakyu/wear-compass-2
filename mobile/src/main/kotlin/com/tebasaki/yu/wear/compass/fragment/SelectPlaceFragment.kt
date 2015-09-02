@@ -9,10 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.AutoCompleteTextView
-import android.widget.Button
-import android.widget.TextView
+import android.widget.*
 import butterknife.bindView
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.ResultCallback
@@ -22,7 +19,6 @@ import com.google.android.gms.location.places.Places
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.Wearable
 import com.tebasaki.yu.wear.compass.R
 import com.tebasaki.yu.wear.compass.adapter.PlaceAutocompleteAdapter
@@ -44,6 +40,9 @@ public class SelectPlaceFragment : Fragment() {
     private val autocompletePlaces: AutoCompleteTextView by bindView(R.id.autocomplete_places)
     private var mAdapter: PlaceAutocompleteAdapter? = null
 
+    private var mLatitude: Double = 0.0
+    private var mLongitude: Double = 0.0
+
     companion object {
 
         private val TAG: String = SelectPlaceFragment.javaClass.getSimpleName()
@@ -64,17 +63,6 @@ public class SelectPlaceFragment : Fragment() {
         mGoogleApiClient = GoogleApiClient.Builder(getActivity())
                 .addApi(Places.GEO_DATA_API)
                 .addApi(Wearable.API)
-                .addConnectionCallbacks(object : GoogleApiClient.ConnectionCallbacks {
-                    override fun onConnected(bundle: Bundle) {
-                        Log.d("", "onConnected")
-                    }
-                    override fun onConnectionSuspended(i: Int) {
-                        Log.d("", "onConnectionSuspended: " + i)
-                    }
-                })
-                .addOnConnectionFailedListener {
-                    connectionResult -> Log.d("", "onConnectionFailed: " + connectionResult)
-                }
                 .build()
     }
 
@@ -96,11 +84,22 @@ public class SelectPlaceFragment : Fragment() {
         }
 
         sendDataToWearBtn.setOnClickListener {
+            if (0.0 == mLatitude || 0.0 == mLongitude) {
+                showToast("Please pick or input place")
+                return@setOnClickListener
+            }
             Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(
                     { nodes ->
-                        Log.d(TAG, "get nodes")
+                        val sendStr: String = mLatitude.toString() + "," + mLongitude.toString()
+                        val sendData: ByteArray = sendStr.toByteArray()
                         for (node in nodes.getNodes()) {
-                            // TODO: sending message to node
+                            Wearable.MessageApi
+                                    .sendMessage(mGoogleApiClient, node.getId(), "/locale_set", sendData)
+                                    .setResultCallback(
+                                            { result ->
+                                                showToast(result.getStatus().toString())
+                                            }
+                                    )
                         }
                     })
         }
@@ -182,5 +181,9 @@ public class SelectPlaceFragment : Fragment() {
         val local: LatLng = place.getLatLng()
         latitudeText.setText(local.latitude.toString())
         longitudeText.setText(local.longitude.toString())
+    }
+
+    private fun showToast(msg: String) {
+        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show()
     }
 }
