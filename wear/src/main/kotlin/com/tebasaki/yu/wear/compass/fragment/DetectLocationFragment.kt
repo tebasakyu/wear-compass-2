@@ -17,7 +17,6 @@ import kotlin.platform.platformStatic
 
 public class DetectLocationFragment : Fragment() ,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
     private val UPDATE_INTERVAL_MS: Long = 1000
@@ -46,7 +45,6 @@ public class DetectLocationFragment : Fragment() ,
                 .addApi(LocationServices.API)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
                 .build()
     }
 
@@ -100,10 +98,6 @@ public class DetectLocationFragment : Fragment() ,
 
     override fun onConnectionSuspended(i: Int) {
         Log.d("", "connection to location client suspended");
-    }
-
-    override fun onConnectionFailed(result: ConnectionResult) {
-
     }
 
     override fun onLocationChanged(location: Location) {
