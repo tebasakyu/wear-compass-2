@@ -78,7 +78,7 @@ public class DetectLocationFragment : Fragment() ,
     }
 
 
-    override fun onConnected(bundle: Bundle) {
+    override fun onConnected(bundle: Bundle?) {
 
         // 位置情報取得の設定
         var locationRequest: LocationRequest = LocationRequest.create()
@@ -111,8 +111,7 @@ public class DetectLocationFragment : Fragment() ,
     }
 
     override fun onLocationChanged(location: Location) {
-        Log.d("", "Latitude=" + location.getLatitude())
-        Log.d("", "Longitude=" + location.getLongitude())
+        mCallback?.onLocationChanged(location)
     }
 
 
