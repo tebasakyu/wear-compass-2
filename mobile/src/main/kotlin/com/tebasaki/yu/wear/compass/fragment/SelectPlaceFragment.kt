@@ -51,7 +51,7 @@ public class SelectPlaceFragment : Fragment() {
                 LatLng(-34.041458, 150.790100), LatLng(-33.682247, 151.383362)
         )
 
-        platformStatic fun newInstance() : SelectPlaceFragment {
+        @platformStatic fun newInstance() : SelectPlaceFragment {
             return SelectPlaceFragment()
         }
     }

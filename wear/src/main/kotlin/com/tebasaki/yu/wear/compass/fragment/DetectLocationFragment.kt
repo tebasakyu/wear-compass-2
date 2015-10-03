@@ -28,7 +28,7 @@ public class DetectLocationFragment : Fragment() ,
 
 
     companion object {
-        platformStatic fun newInstance() : DetectLocationFragment {
+        @platformStatic fun newInstance() : DetectLocationFragment {
             return DetectLocationFragment()
         }
     }

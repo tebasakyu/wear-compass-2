@@ -26,7 +26,7 @@ public class DetectCompassFragment : Fragment() {
     private var currentAzimuth: Float = 0f
 
     companion object {
-        platformStatic fun newInstance() : DetectCompassFragment {
+        @platformStatic fun newInstance() : DetectCompassFragment {
             return DetectCompassFragment()
         }
     }
@@ -63,7 +63,7 @@ public class DetectCompassFragment : Fragment() {
         }
     }
 
-    synchronized fun getAzimuth(event: SensorEvent) {
+    fun getAzimuth(event: SensorEvent) {
 
         val alpha : Float = 0.97f
 
