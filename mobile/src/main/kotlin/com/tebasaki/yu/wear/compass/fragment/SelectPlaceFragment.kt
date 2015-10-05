@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.TextUtils
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +21,6 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.wearable.Wearable
 import com.tebasaki.yu.wear.compass.R
 import com.tebasaki.yu.wear.compass.adapter.PlaceAutocompleteAdapter
-import kotlin.platform.platformStatic
 
 
 public class SelectPlaceFragment : Fragment() {
@@ -51,7 +49,7 @@ public class SelectPlaceFragment : Fragment() {
                 LatLng(-34.041458, 150.790100), LatLng(-33.682247, 151.383362)
         )
 
-        platformStatic fun newInstance() : SelectPlaceFragment {
+        fun newInstance() : SelectPlaceFragment {
             return SelectPlaceFragment()
         }
     }
@@ -60,7 +58,7 @@ public class SelectPlaceFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mGoogleApiClient = GoogleApiClient.Builder(getActivity())
+        mGoogleApiClient = GoogleApiClient.Builder(activity)
                 .addApi(Places.GEO_DATA_API)
                 .addApi(Wearable.API)
                 .build()
@@ -80,7 +78,7 @@ public class SelectPlaceFragment : Fragment() {
 
         startPlacePickerBtn.setOnClickListener {
             val builder: PlacePicker.IntentBuilder = PlacePicker.IntentBuilder()
-            startActivityForResult(builder.build(getActivity()), PLACE_PICKER_REQUEST)
+            startActivityForResult(builder.build(activity), PLACE_PICKER_REQUEST)
         }
 
         sendDataToWearBtn.setOnClickListener {
@@ -92,22 +90,22 @@ public class SelectPlaceFragment : Fragment() {
                     { nodes ->
                         val sendStr: String = mLatitude.toString() + "," + mLongitude.toString()
                         val sendData: ByteArray = sendStr.toByteArray()
-                        for (node in nodes.getNodes()) {
+                        for (node in nodes.nodes) {
                             Wearable.MessageApi
-                                    .sendMessage(mGoogleApiClient, node.getId(), "/locale_set", sendData)
+                                    .sendMessage(mGoogleApiClient, node.id, "/locale_set", sendData)
                                     .setResultCallback(
                                             { result ->
-                                                showToast(result.getStatus().toString())
+                                                showToast(result.status.toString())
                                             }
                                     )
                         }
                     })
         }
 
-        mAdapter = PlaceAutocompleteAdapter(getActivity(), R.layout.item_auto_complete_text,
+        mAdapter = PlaceAutocompleteAdapter(activity, R.layout.item_auto_complete_text,
                 mGoogleApiClient!!, BOUNDS_GREATER_SYDNEY, null)
         autocompletePlaces.setAdapter(mAdapter)
-        autocompletePlaces.setOnItemClickListener(mAutocompleteClickListener)
+        autocompletePlaces.onItemClickListener = mAutocompleteClickListener
     }
 
     override fun onStop() {
@@ -121,7 +119,7 @@ public class SelectPlaceFragment : Fragment() {
         if (PLACE_PICKER_REQUEST == requestCode) {
             if (Activity.RESULT_OK == resultCode) {
                 // to display
-                displayPlaceInfo(PlacePicker.getPlace(data, getActivity()))
+                displayPlaceInfo(PlacePicker.getPlace(data, activity))
             }
         }
     }
@@ -134,7 +132,7 @@ public class SelectPlaceFragment : Fragment() {
             val placeId = item?.placeId.toString()
 
             autocompletePlaces.setText(item?.description)
-            autocompletePlaces.setSelection(autocompletePlaces.getText().length())
+            autocompletePlaces.setSelection(autocompletePlaces.text.length())
 
             val placeResult = Places.GeoDataApi.getPlaceById(mGoogleApiClient, placeId)
             placeResult.setResultCallback(mUpdatePlaceDetailsCallback)
@@ -144,7 +142,7 @@ public class SelectPlaceFragment : Fragment() {
     private val mUpdatePlaceDetailsCallback = object : ResultCallback<PlaceBuffer> {
         override fun onResult(places: PlaceBuffer?) {
 
-            if (!places!!.getStatus()!!.isSuccess()) {
+            if (!places!!.status!!.isSuccess) {
                 // Request did not complete successfully
                 places.release()
                 return
@@ -163,27 +161,27 @@ public class SelectPlaceFragment : Fragment() {
     private fun displayPlaceInfo(place: Place) {
 
         // Place name
-        placeName.setText(place.getName())
+        placeName.text = place.name
         // Tel
-        if (!TextUtils.isEmpty(place.getPhoneNumber())) {
-            phoneNumber.setText(place.getPhoneNumber())
+        if (!TextUtils.isEmpty(place.phoneNumber)) {
+            phoneNumber.text = place.phoneNumber
         } else {
             phoneNumber.setText(R.string.none)
         }
         // Web URL
-        if (null != place.getWebsiteUri()) {
-            webSiteUrl.setText(place.getWebsiteUri().toString())
+        if (null != place.websiteUri) {
+            webSiteUrl.text = place.websiteUri.toString()
         } else {
-            phoneNumber.setText(R.string.none)
+            webSiteUrl.setText(R.string.none)
         }
 
         // Local
-        val local: LatLng = place.getLatLng()
-        latitudeText.setText(local.latitude.toString())
-        longitudeText.setText(local.longitude.toString())
+        val local: LatLng = place.latLng
+        latitudeText.text = local.latitude.toString()
+        longitudeText.text = local.longitude.toString()
     }
 
     private fun showToast(msg: String) {
-        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show()
+        Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
     }
 }

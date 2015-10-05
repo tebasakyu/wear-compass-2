@@ -9,7 +9,6 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
-import kotlin.platform.platformStatic
 
 
 public class DetectCompassFragment : Fragment() {
@@ -26,7 +25,7 @@ public class DetectCompassFragment : Fragment() {
     private var currentAzimuth: Float = 0f
 
     companion object {
-        platformStatic fun newInstance() : DetectCompassFragment {
+        fun newInstance() : DetectCompassFragment {
             return DetectCompassFragment()
         }
     }
@@ -35,7 +34,7 @@ public class DetectCompassFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // get SensorManager
-        mSensorManager = getActivity().getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        mSensorManager = activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mAccelSensor = mSensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         mMagneticSensor = mSensorManager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
@@ -63,17 +62,17 @@ public class DetectCompassFragment : Fragment() {
         }
     }
 
-    synchronized fun getAzimuth(event: SensorEvent) {
+    fun getAzimuth(event: SensorEvent) {
 
         val alpha : Float = 0.97f
 
-        if (Sensor.TYPE_ACCELEROMETER == event.sensor.getType()) {
+        if (Sensor.TYPE_ACCELEROMETER == event.sensor.type) {
             mAccel[0] = alpha * mAccel[0] + (1 - alpha) * event.values[0];
             mAccel[1] = alpha * mAccel[1] + (1 - alpha) * event.values[1];
             mAccel[2] = alpha * mAccel[2] + (1 - alpha) * event.values[2];
         }
 
-        if (Sensor.TYPE_MAGNETIC_FIELD == event.sensor.getType()) {
+        if (Sensor.TYPE_MAGNETIC_FIELD == event.sensor.type) {
             mGeomagnetic[0] = alpha * mGeomagnetic[0] + (1 - alpha) * event.values[0];
             mGeomagnetic[1] = alpha * mGeomagnetic[1] + (1 - alpha) * event.values[1];
             mGeomagnetic[2] = alpha * mGeomagnetic[2] + (1 - alpha) * event.values[2];

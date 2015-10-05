@@ -44,7 +44,7 @@ public class PlaceAutocompleteAdapter(val mContext: Context, val mResource: Int,
         }
 
         val placeNameText: TextView = convertView?.findViewById(R.id.placeName) as TextView
-        placeNameText.setText(mResultList!!.get(position).description)
+        placeNameText.text = mResultList!!.get(position).description
 
         return convertView
     }
@@ -83,7 +83,7 @@ public class PlaceAutocompleteAdapter(val mContext: Context, val mResource: Int,
             }
 
             override fun publishResults(constraint: CharSequence?, results: Filter.FilterResults) {
-                if (results != null && results.count > 0) {
+                if (results.count > 0) {
                     // The API returned at least one result, update the data.
                     notifyDataSetChanged()
                 } else {
@@ -97,7 +97,7 @@ public class PlaceAutocompleteAdapter(val mContext: Context, val mResource: Int,
 
     private fun getAutocomplete(constraint: CharSequence): ArrayList<PlaceAutocomplete>? {
 
-        if (!mGoogleApiClient.isConnected()) {
+        if (!mGoogleApiClient.isConnected) {
             return null
         } else {
 
@@ -111,8 +111,8 @@ public class PlaceAutocompleteAdapter(val mContext: Context, val mResource: Int,
             val autocompletePredictions = results.await(60, TimeUnit.SECONDS)
 
             // Confirm that the query completed successfully, otherwise return null
-            val status = autocompletePredictions.getStatus()
-            if (!status.isSuccess()) {
+            val status = autocompletePredictions.status
+            if (!status.isSuccess) {
                 autocompletePredictions.release()
                 return null
             }
@@ -124,7 +124,7 @@ public class PlaceAutocompleteAdapter(val mContext: Context, val mResource: Int,
 
             while (iterator.hasNext()) {
                 val prediction = iterator.next()
-                resultList.add(PlaceAutocomplete(prediction.getPlaceId(), prediction.getDescription()))
+                resultList.add(PlaceAutocomplete(prediction.placeId, prediction.description))
             }
             // Release the buffer now that all data has been copied.
             autocompletePredictions.release()
