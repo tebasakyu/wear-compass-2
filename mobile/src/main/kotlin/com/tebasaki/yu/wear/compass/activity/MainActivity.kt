@@ -13,7 +13,7 @@ public class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        getSupportFragmentManager().beginTransaction()
+        supportFragmentManager.beginTransaction()
                 .add(R.id.fragmentContainer, SelectPlaceFragment.newInstance())
                 .commit()
     }

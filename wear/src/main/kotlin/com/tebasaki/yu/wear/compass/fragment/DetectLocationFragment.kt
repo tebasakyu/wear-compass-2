@@ -14,7 +14,6 @@ import com.google.android.gms.location.LocationListener
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.wearable.Wearable
-import kotlin.platform.platformStatic
 
 public class DetectLocationFragment : Fragment() ,
         GoogleApiClient.ConnectionCallbacks,
@@ -28,22 +27,22 @@ public class DetectLocationFragment : Fragment() ,
 
 
     companion object {
-        @platformStatic fun newInstance() : DetectLocationFragment {
+        fun newInstance() : DetectLocationFragment {
             return DetectLocationFragment()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super<Fragment>.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
 
         // hardware has GPS check
         if (! hasGps()) {
-            Log.w("", "This hardware doesn't have GPS.");
-            getActivity().getFragmentManager().popBackStack()
+            Log.w("", "This hardware doesn't have GPS.")
+            activity.fragmentManager.popBackStack()
         }
 
         // build GoogleApiClient
-        mGoogleApiClient = GoogleApiClient.Builder(getActivity())
+        mGoogleApiClient = GoogleApiClient.Builder(activity)
                 .addApi(LocationServices.API)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
@@ -52,12 +51,12 @@ public class DetectLocationFragment : Fragment() ,
 
 
     override fun onResume() {
-        super<Fragment>.onResume()
+        super.onResume()
         mGoogleApiClient?.connect()
     }
 
     override fun onAttach(activity: Activity?) {
-        super<Fragment>.onAttach(activity)
+        super.onAttach(activity)
 
         try {
             mCallback = activity as OnLocationListener
@@ -67,10 +66,10 @@ public class DetectLocationFragment : Fragment() ,
     }
 
     override fun onPause() {
-        super<Fragment>.onPause()
+        super.onPause()
 
         if (null != mGoogleApiClient) {
-            if (mGoogleApiClient!!.isConnected()) {
+            if (mGoogleApiClient!!.isConnected) {
                 LocationServices.FusedLocationApi
                         .removeLocationUpdates(mGoogleApiClient, this);
             }
@@ -93,22 +92,22 @@ public class DetectLocationFragment : Fragment() ,
                 .setResultCallback(object: ResultCallback<Status> {
                     override fun onResult(status: Status) {
 
-                        if (status.getStatus().isSuccess()) {
-                            Log.d("", "Successfully requested location updates");
+                        if (status.status.isSuccess) {
+                            Log.d("", "Successfully requested location updates")
                         } else {
                             Log.e("",
                                     "Failed in requesting location updates, "
                                             + "status code: "
-                                            + status.getStatusCode()
+                                            + status.statusCode
                                             + ", message: "
-                                            + status.getStatusMessage());
+                                            + status.statusMessage)
                         }
                     }
                 })
     }
 
     override fun onConnectionSuspended(i: Int) {
-        Log.d("", "connection to location client suspended");
+        Log.d("", "connection to location client suspended")
     }
 
     override fun onLocationChanged(location: Location) {
@@ -117,7 +116,7 @@ public class DetectLocationFragment : Fragment() ,
 
 
     private fun hasGps() : Boolean {
-        return getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+        return activity.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
     }
 
 
