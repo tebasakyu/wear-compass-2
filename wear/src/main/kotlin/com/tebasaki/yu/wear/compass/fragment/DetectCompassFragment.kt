@@ -88,8 +88,8 @@ public class DetectCompassFragment : Fragment() {
             azimuth = Math.toDegrees(orientation.get(0).toDouble()).toFloat();
             azimuth = (azimuth + 360) % 360;
 
-            Log.d("DetectCompassFragment", "currectAzimuth = " + currentAzimuth)
-            Log.d("DetectCompassFragment", "azimuth = " + azimuth)
+//            Log.d("DetectCompassFragment", "currectAzimuth = " + currentAzimuth)
+//            Log.d("DetectCompassFragment", "azimuth = " + azimuth)
             mCallback?.onCompassChanged(currentAzimuth, azimuth)
 
             currentAzimuth = azimuth

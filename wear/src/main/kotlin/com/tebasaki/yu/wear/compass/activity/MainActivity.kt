@@ -4,6 +4,7 @@ import android.location.Location
 import android.os.Bundle
 import android.support.wearable.activity.WearableActivity
 import android.support.wearable.view.WatchViewStub
+import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.widget.ImageView
@@ -64,19 +65,19 @@ public class MainActivity : WearableActivity(),
 
     override fun onEnterAmbient(ambientDetails: Bundle?) {
         super.onEnterAmbient(ambientDetails)
-        mCanUpdateViews = true
+        mCanUpdateViews = false
     }
 
     override fun onExitAmbient() {
         super.onExitAmbient()
-        mCanUpdateViews = false
+        mCanUpdateViews = true
     }
 
 
     private fun displayToDestination(bearingTo: Float) {
 
-        val rotateFrom = bearingTo - mFromAzimuth
-        val rotateTo = bearingTo - mToAzimuth
+        val rotateFrom = mFromAzimuth - bearingTo
+        val rotateTo = mToAzimuth - bearingTo
 
         val anim: Animation = RotateAnimation(-rotateFrom, -rotateTo,
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f)
