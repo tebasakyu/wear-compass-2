@@ -4,6 +4,7 @@ import android.location.Location
 import android.os.Bundle
 import android.support.wearable.activity.WearableActivity
 import android.support.wearable.view.WatchViewStub
+import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.widget.ImageView
@@ -22,8 +23,14 @@ public class MainActivity : WearableActivity(),
     private var mCanUpdateViews: Boolean = false
     private var mFromAzimuth: Float = 0f
     private var mToAzimuth: Float = 0f
+    private var mDestinationLatitude = 0.0
+    private var mDestinationLongitude = 0.0
 
     private var mImageView: ImageView? = null
+
+    companion object {
+        val TAG: String = MainActivity.javaClass.simpleName
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,17 +41,37 @@ public class MainActivity : WearableActivity(),
         // use GoogleApiClient for receive message in Activity
         mGoogleApiClient = GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
+                .addConnectionCallbacks(object: GoogleApiClient.ConnectionCallbacks {
+                    override fun onConnected(bundle: Bundle?) {
+                        Wearable.MessageApi.addListener(mGoogleApiClient, {
+                            messageEvent ->
+                                if (messageEvent.path.equals("/locale_set")) {
+
+                                    // parse data from mobile
+                                    val message = String(messageEvent.data)
+                                    Log.d(TAG, "message = $message")
+                                    val latLog = message.split(",")
+                                    mDestinationLatitude = latLog.get(0).toDouble()
+                                    mDestinationLongitude = latLog.get(1).toDouble()
+
+                                    // start detect
+                                    fragmentManager.beginTransaction()
+                                            .add(R.id.fl_container, DetectLocationFragment.newInstance())
+                                            .add(R.id.fl_container, DetectCompassFragment.newInstance())
+                                            .commit()
+                                }
+                        })
+                    }
+                    override fun onConnectionSuspended(i: Int) {
+                        // no-op
+                    }
+                })
                 .build()
 
         val stub = findViewById(R.id.watch_view_stub) as WatchViewStub
         stub.setOnLayoutInflatedListener(object : WatchViewStub.OnLayoutInflatedListener {
             override fun onLayoutInflated(stub: WatchViewStub) {
                 mImageView = stub.findViewById(R.id.img) as ImageView
-
-                fragmentManager.beginTransaction()
-                        .add(R.id.fl_container, DetectLocationFragment.newInstance())
-                        .add(R.id.fl_container, DetectCompassFragment.newInstance())
-                        .commit()
             }
         })
     }
@@ -66,10 +93,9 @@ public class MainActivity : WearableActivity(),
     override fun onLocationChanged(location: Location) {
         if (mCanUpdateViews) {
 
-            // debug code 中目黒駅
             val locationTo: Location = Location("")
-            locationTo.latitude = 35.6442877
-            locationTo.longitude = 139.6990956
+            locationTo.latitude = mDestinationLatitude
+            locationTo.longitude = mDestinationLongitude
 
             val bearing: Float = location.bearingTo(locationTo)
             displayToDestination(if (0 < bearing) { 360 - bearing } else { bearing * (-1)})
