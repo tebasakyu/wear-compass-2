@@ -4,10 +4,11 @@ import android.location.Location
 import android.os.Bundle
 import android.support.wearable.activity.WearableActivity
 import android.support.wearable.view.WatchViewStub
-import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.widget.ImageView
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.wearable.Wearable
 import com.tebasaki.yu.wear.compass.R
 import com.tebasaki.yu.wear.compass.fragment.DetectCompassFragment
 import com.tebasaki.yu.wear.compass.fragment.DetectLocationFragment
@@ -15,6 +16,8 @@ import com.tebasaki.yu.wear.compass.fragment.DetectLocationFragment
 public class MainActivity : WearableActivity(),
                             DetectLocationFragment.OnLocationListener,
                             DetectCompassFragment.OnCompassListener {
+
+    private var mGoogleApiClient: GoogleApiClient? = null
 
     private var mCanUpdateViews: Boolean = false
     private var mFromAzimuth: Float = 0f
@@ -25,8 +28,13 @@ public class MainActivity : WearableActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         // supports ambient mode
         setAmbientEnabled()
+        // use GoogleApiClient for receive message in Activity
+        mGoogleApiClient = GoogleApiClient.Builder(this)
+                .addApi(Wearable.API)
+                .build()
 
         val stub = findViewById(R.id.watch_view_stub) as WatchViewStub
         stub.setOnLayoutInflatedListener(object : WatchViewStub.OnLayoutInflatedListener {
@@ -39,6 +47,20 @@ public class MainActivity : WearableActivity(),
                         .commit()
             }
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (null != mGoogleApiClient) {
+            mGoogleApiClient!!.connect()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (null != mGoogleApiClient && mGoogleApiClient!!.isConnected) {
+            mGoogleApiClient!!.disconnect()
+        }
     }
 
     override fun onLocationChanged(location: Location) {
