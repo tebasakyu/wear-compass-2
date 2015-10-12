@@ -1,13 +1,13 @@
 package com.tebasaki.yu.wear.compass.fragment
 
 import android.app.Activity
+import android.app.Fragment
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.util.Log
 
 
@@ -88,8 +88,8 @@ public class DetectCompassFragment : Fragment() {
             azimuth = Math.toDegrees(orientation.get(0).toDouble()).toFloat();
             azimuth = (azimuth + 360) % 360;
 
-            Log.d("DetectCompassFragment", "currectAzimuth = " + currentAzimuth)
-            Log.d("DetectCompassFragment", "azimuth = " + azimuth)
+//            Log.d("DetectCompassFragment", "currectAzimuth = " + currentAzimuth)
+//            Log.d("DetectCompassFragment", "azimuth = " + azimuth)
             mCallback?.onCompassChanged(currentAzimuth, azimuth)
 
             currentAzimuth = azimuth
