@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.widget.ImageView
+import android.widget.TextView
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.wearable.Wearable
 import com.tebasaki.yu.wear.compass.R
@@ -26,7 +27,8 @@ public class MainActivity : WearableActivity(),
     private var mDestinationLatitude = 0.0
     private var mDestinationLongitude = 0.0
 
-    private var mImageView: ImageView? = null
+    private var mRemainingDistance: TextView? = null
+    private var mArrowImg: ImageView? = null
 
     companion object {
         val TAG: String = MainActivity.javaClass.simpleName
@@ -71,7 +73,8 @@ public class MainActivity : WearableActivity(),
         val stub = findViewById(R.id.watch_view_stub) as WatchViewStub
         stub.setOnLayoutInflatedListener(object : WatchViewStub.OnLayoutInflatedListener {
             override fun onLayoutInflated(stub: WatchViewStub) {
-                mImageView = stub.findViewById(R.id.img) as ImageView
+                mRemainingDistance = stub.findViewById(R.id.remaining_distance) as TextView
+                mArrowImg = stub.findViewById(R.id.arrow) as ImageView
             }
         })
     }
@@ -96,6 +99,8 @@ public class MainActivity : WearableActivity(),
             val locationTo: Location = Location("")
             locationTo.latitude = mDestinationLatitude
             locationTo.longitude = mDestinationLongitude
+
+            mRemainingDistance?.text = location.distanceTo(locationTo).toInt().toString()
 
             val bearing: Float = location.bearingTo(locationTo)
             displayToDestination(if (0 < bearing) { 360 - bearing } else { bearing * (-1)})
@@ -133,6 +138,6 @@ public class MainActivity : WearableActivity(),
         anim.repeatCount = 0
         anim.fillAfter = true
 
-        mImageView?.startAnimation(anim)
+        mArrowImg?.startAnimation(anim)
     }
 }
