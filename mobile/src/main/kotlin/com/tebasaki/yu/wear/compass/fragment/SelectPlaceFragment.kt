@@ -179,6 +179,9 @@ public class SelectPlaceFragment : Fragment() {
         val local: LatLng = place.latLng
         latitudeText.text = local.latitude.toString()
         longitudeText.text = local.longitude.toString()
+
+        mLatitude = local.latitude
+        mLongitude = local.longitude
     }
 
     private fun showToast(msg: String) {
