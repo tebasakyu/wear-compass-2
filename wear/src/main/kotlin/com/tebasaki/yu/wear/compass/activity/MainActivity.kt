@@ -15,17 +15,19 @@ import com.tebasaki.yu.wear.compass.R
 import com.tebasaki.yu.wear.compass.fragment.DetectCompassFragment
 import com.tebasaki.yu.wear.compass.fragment.DetectLocationFragment
 
+/**
+ * Extends WearableActivity for detect ambient mode.
+ */
 public class MainActivity : WearableActivity(),
                             DetectLocationFragment.OnLocationListener,
                             DetectCompassFragment.OnCompassListener {
 
     private var mGoogleApiClient: GoogleApiClient? = null
 
-    private var mCanUpdateViews: Boolean = false
-    private var mFromAzimuth: Float = 0f
-    private var mToAzimuth: Float = 0f
-    private var mDestinationLatitude = 0.0
-    private var mDestinationLongitude = 0.0
+    private var mCanUpdateViews = false
+    private var mFromAzimuth = 0f
+    private var mToAzimuth = 0f
+    private var mLocationTo= Location("")
 
     private var mRemainingDistance: TextView? = null
     private var mArrowImg: ImageView? = null
@@ -40,6 +42,7 @@ public class MainActivity : WearableActivity(),
 
         // supports ambient mode
         setAmbientEnabled()
+
         // use GoogleApiClient for receive message in Activity
         mGoogleApiClient = GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -53,14 +56,11 @@ public class MainActivity : WearableActivity(),
                                     val message = String(messageEvent.data)
                                     Log.d(TAG, "message = $message")
                                     val latLog = message.split(",")
-                                    mDestinationLatitude = latLog.get(0).toDouble()
-                                    mDestinationLongitude = latLog.get(1).toDouble()
+                                    mLocationTo.latitude = latLog.get(0).toDouble()
+                                    mLocationTo.longitude = latLog.get(1).toDouble()
 
-                                    // start detect
-                                    fragmentManager.beginTransaction()
-                                            .add(R.id.fl_container, DetectLocationFragment.newInstance())
-                                            .add(R.id.fl_container, DetectCompassFragment.newInstance())
-                                            .commit()
+                                    // start detect compass & location
+                                    startDetector()
                                 }
                         })
                     }
@@ -96,13 +96,11 @@ public class MainActivity : WearableActivity(),
     override fun onLocationChanged(location: Location) {
         if (mCanUpdateViews) {
 
-            val locationTo: Location = Location("")
-            locationTo.latitude = mDestinationLatitude
-            locationTo.longitude = mDestinationLongitude
+            // display distance
+            mRemainingDistance?.text = location.distanceTo(mLocationTo).toInt().toString()
 
-            mRemainingDistance?.text = location.distanceTo(locationTo).toInt().toString()
-
-            val bearing: Float = location.bearingTo(locationTo)
+            val bearing: Float = location.bearingTo(mLocationTo)
+            // Location#bearingTo return -180 ~ 180, So adjust the value for use.
             displayToDestination(if (0 < bearing) { 360 - bearing } else { bearing * (-1)})
         }
     }
@@ -118,26 +116,36 @@ public class MainActivity : WearableActivity(),
 
     override fun onEnterAmbient(ambientDetails: Bundle?) {
         super.onEnterAmbient(ambientDetails)
+        // stop view update on ambient mode
         mCanUpdateViews = false
     }
 
     override fun onExitAmbient() {
         super.onExitAmbient()
+        // restart view update exit ambient mode
         mCanUpdateViews = true
     }
 
 
+    private fun startDetector() {
+        fragmentManager.beginTransaction()
+                .add(R.id.fl_container, DetectLocationFragment.newInstance())
+                .add(R.id.fl_container, DetectCompassFragment.newInstance())
+                .commit()
+    }
+
     private fun displayToDestination(bearingTo: Float) {
 
+        // adjust value to destination
         val rotateFrom = mFromAzimuth - bearingTo
         val rotateTo = mToAzimuth - bearingTo
 
+        // animation arrow image
         val anim: Animation = RotateAnimation(-rotateFrom, -rotateTo,
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f)
         anim.duration = 300
         anim.repeatCount = 0
         anim.fillAfter = true
-
         mArrowImg?.startAnimation(anim)
     }
 }

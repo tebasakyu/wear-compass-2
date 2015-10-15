@@ -8,9 +8,13 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.util.Log
 
-
+/**
+ * Detector compass use accelerometer & magnetic-field sensor
+ * From this(https://github.com/iutinvg/compass)
+ *
+ * Must implement OnCompassListener when use this fragment
+ */
 public class DetectCompassFragment : Fragment() {
 
     private var mCallback : OnCompassListener? = null
@@ -19,10 +23,10 @@ public class DetectCompassFragment : Fragment() {
     private var mMagneticSensor : Sensor? = null
     private var mSensorEventListener : SensorEventListener? = null
 
-    private var mAccel : FloatArray = FloatArray(3)
-    private var mGeomagnetic : FloatArray = FloatArray(3)
-    private var azimuth : Float = 0f
-    private var currentAzimuth: Float = 0f
+    private var mAccel = FloatArray(3)
+    private var mGeomagnetic = FloatArray(3)
+    private var mAzimuth = 0f
+    private var mCurrentAzimuth = 0f
 
     companion object {
         fun newInstance() : DetectCompassFragment {
@@ -40,15 +44,12 @@ public class DetectCompassFragment : Fragment() {
 
         // implements SensorEventListener
         mSensorEventListener = object:SensorEventListener {
-
             override fun onSensorChanged(event: SensorEvent) {
                 getAzimuth(event)
             }
-
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
                 // no-op
             }
-
         }
     }
 
@@ -85,15 +86,13 @@ public class DetectCompassFragment : Fragment() {
         if (success) {
             var orientation : FloatArray = FloatArray(3)
             SensorManager.getOrientation(r, orientation);
-            azimuth = Math.toDegrees(orientation.get(0).toDouble()).toFloat();
-            azimuth = (azimuth + 360) % 360;
+            mAzimuth = Math.toDegrees(orientation.get(0).toDouble()).toFloat();
+            mAzimuth = (mAzimuth + 360) % 360;
 
-//            Log.d("DetectCompassFragment", "currectAzimuth = " + currentAzimuth)
-//            Log.d("DetectCompassFragment", "azimuth = " + azimuth)
-            mCallback?.onCompassChanged(currentAzimuth, azimuth)
+            // callback to listener
+            mCallback?.onCompassChanged(mCurrentAzimuth, mAzimuth)
 
-            currentAzimuth = azimuth
-
+            mCurrentAzimuth = mAzimuth
         }
     }
 

@@ -26,7 +26,6 @@ public class PlaceAutocompleteAdapter(val mContext: Context, val mResource: Int,
                                       val mPlaceFilter: AutocompleteFilter?) : BaseAdapter(), Filterable {
 
     private var mInflater: LayoutInflater? = null
-
     /** initializer blocks */
     init {
         mInflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
