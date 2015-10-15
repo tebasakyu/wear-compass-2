@@ -15,18 +15,23 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.wearable.Wearable
 
+/**
+ * Detector location on device.
+ *
+ * Must implement OnLocationListener when use this fragment
+ */
 public class DetectLocationFragment : Fragment() ,
         GoogleApiClient.ConnectionCallbacks,
         LocationListener {
 
-    private val UPDATE_INTERVAL_MS: Long = 1000
-    private val FASTEST_INTERVAL_MS: Long = 500
-
     private var mGoogleApiClient: GoogleApiClient? = null
     private var mCallback : OnLocationListener? = null
 
-
     companion object {
+
+        private val UPDATE_INTERVAL_MS = 500L
+        private val FASTEST_INTERVAL_MS= 500L
+
         fun newInstance() : DetectLocationFragment {
             return DetectLocationFragment()
         }
@@ -80,13 +85,13 @@ public class DetectLocationFragment : Fragment() ,
 
     override fun onConnected(bundle: Bundle?) {
 
-        // 位置情報取得の設定
+        // settings
         var locationRequest: LocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setInterval(UPDATE_INTERVAL_MS)
                 .setFastestInterval(FASTEST_INTERVAL_MS)
 
-        // 位置情報の要求
+        // request location
         LocationServices.FusedLocationApi
                 .requestLocationUpdates(mGoogleApiClient, locationRequest, this)
                 .setResultCallback(object: ResultCallback<Status> {
@@ -115,6 +120,9 @@ public class DetectLocationFragment : Fragment() ,
     }
 
 
+    /**
+     * Check has feature GPS.
+     */
     private fun hasGps() : Boolean {
         return activity.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
     }
