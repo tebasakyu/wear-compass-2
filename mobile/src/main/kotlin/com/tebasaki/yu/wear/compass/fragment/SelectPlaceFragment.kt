@@ -27,15 +27,15 @@ public class SelectPlaceFragment : Fragment() {
 
     private var mGoogleApiClient: GoogleApiClient? = null
 
-    private val startPlacePickerBtn: Button by bindView(R.id.startPlacePickerBtn)
-    private val placeName: TextView by bindView(R.id.placeName)
-    private val phoneNumber: TextView by bindView(R.id.phoneNumber)
-    private val webSiteUrl: TextView by bindView(R.id.webSiteUrl)
-    private val latitudeText: TextView by bindView(R.id.latitude)
-    private val longitudeText: TextView by bindView(R.id.longitude)
-    private val sendDataToWearBtn: Button by bindView(R.id.sendDataToWearBtn)
+    private val mStartPlacePickerBtn: Button by bindView(R.id.startPlacePickerBtn)
+    private val mPlaceName: TextView by bindView(R.id.placeName)
+    private val mPhoneNumber: TextView by bindView(R.id.phoneNumber)
+    private val mWebSiteUrl: TextView by bindView(R.id.webSiteUrl)
+    private val mLatitudeText: TextView by bindView(R.id.latitude)
+    private val mLongitudeText: TextView by bindView(R.id.longitude)
+    private val mSendDataToWearBtn: Button by bindView(R.id.sendDataToWearBtn)
 
-    private val autocompletePlaces: AutoCompleteTextView by bindView(R.id.autocomplete_places)
+    private val mAutocompletePlaces: AutoCompleteTextView by bindView(R.id.autocomplete_places)
     private var mAdapter: PlaceAutocompleteAdapter? = null
 
     private var mLatitude: Double = 0.0
@@ -43,7 +43,7 @@ public class SelectPlaceFragment : Fragment() {
 
     companion object {
 
-        private val TAG: String = SelectPlaceFragment.javaClass.getSimpleName()
+        private val TAG: String = SelectPlaceFragment.javaClass.simpleName
         private val PLACE_PICKER_REQUEST: Int = 1000
         private val BOUNDS_GREATER_SYDNEY: LatLngBounds = LatLngBounds(
                 LatLng(-34.041458, 150.790100), LatLng(-33.682247, 151.383362)
@@ -58,6 +58,7 @@ public class SelectPlaceFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // use GoogleApiClient
         mGoogleApiClient = GoogleApiClient.Builder(activity)
                 .addApi(Places.GEO_DATA_API)
                 .addApi(Wearable.API)
@@ -73,19 +74,25 @@ public class SelectPlaceFragment : Fragment() {
         return inflater?.inflate(R.layout.fragment_select_place, container, false)
     }
 
+
+    /**
+     * View injection complete when onActivityCreated
+     * so buttons setOnClickListener on this.
+     */
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        startPlacePickerBtn.setOnClickListener {
+        mStartPlacePickerBtn.setOnClickListener {
             val builder: PlacePicker.IntentBuilder = PlacePicker.IntentBuilder()
             startActivityForResult(builder.build(activity), PLACE_PICKER_REQUEST)
         }
 
-        sendDataToWearBtn.setOnClickListener {
+        mSendDataToWearBtn.setOnClickListener {
             if (0.0 == mLatitude || 0.0 == mLongitude) {
                 showToast("Please pick or input place")
                 return@setOnClickListener
             }
+            // Send data to wear, Use MessageApi
             Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(
                     { nodes ->
                         val sendStr: String = mLatitude.toString() + "," + mLongitude.toString()
@@ -102,10 +109,11 @@ public class SelectPlaceFragment : Fragment() {
                     })
         }
 
+        // Edit place with auto complete
         mAdapter = PlaceAutocompleteAdapter(activity, R.layout.item_auto_complete_text,
                 mGoogleApiClient!!, BOUNDS_GREATER_SYDNEY, null)
-        autocompletePlaces.setAdapter(mAdapter)
-        autocompletePlaces.onItemClickListener = mAutocompleteClickListener
+        mAutocompletePlaces.setAdapter(mAdapter)
+        mAutocompletePlaces.onItemClickListener = mAutocompleteClickListener
     }
 
     override fun onStop() {
@@ -113,6 +121,10 @@ public class SelectPlaceFragment : Fragment() {
         mGoogleApiClient?.disconnect()
     }
 
+
+    /**
+     * For PLACE_PICKER_UI
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -131,8 +143,8 @@ public class SelectPlaceFragment : Fragment() {
             val item = mAdapter?.getItem(position)
             val placeId = item?.placeId.toString()
 
-            autocompletePlaces.setText(item?.description)
-            autocompletePlaces.setSelection(autocompletePlaces.text.length())
+            mAutocompletePlaces.setText(item?.description)
+            mAutocompletePlaces.setSelection(mAutocompletePlaces.text.length())
 
             val placeResult = Places.GeoDataApi.getPlaceById(mGoogleApiClient, placeId)
             placeResult.setResultCallback(mUpdatePlaceDetailsCallback)
@@ -161,27 +173,26 @@ public class SelectPlaceFragment : Fragment() {
     private fun displayPlaceInfo(place: Place) {
 
         // Place name
-        placeName.text = place.name
+        mPlaceName.text = place.name
         // Tel
-        if (!TextUtils.isEmpty(place.phoneNumber)) {
-            phoneNumber.text = place.phoneNumber
+        mPhoneNumber.text = if (!TextUtils.isEmpty(place.phoneNumber)) {
+            place.phoneNumber
         } else {
-            phoneNumber.setText(R.string.none)
+            getText(R.string.none)
         }
         // Web URL
-        if (null != place.websiteUri) {
-            webSiteUrl.text = place.websiteUri.toString()
+        mWebSiteUrl.text = if (null != place.websiteUri) {
+            place.websiteUri.toString()
         } else {
-            webSiteUrl.setText(R.string.none)
+            getText(R.string.none)
         }
 
         // Local
         val local: LatLng = place.latLng
-        latitudeText.text = local.latitude.toString()
-        longitudeText.text = local.longitude.toString()
-
         mLatitude = local.latitude
         mLongitude = local.longitude
+        mLatitudeText.text = mLatitude.toString()
+        mLongitudeText.text = mLongitude.toString()
     }
 
     private fun showToast(msg: String) {
