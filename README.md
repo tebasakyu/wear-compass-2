@@ -6,6 +6,10 @@
 ## wear
 ![ss_4](https://raw.github.com/wiki/s-makotoy/wear-compass-2/ss_4.png)
 
+## What is this app
+Navigate to destination on wearable device.  
+Destination select on mobile.
+
 ## Usage
 This app use `Google Places API for Android`.  
 Please input your API key to `mobile/src/main/res/values/key.xml`.  
